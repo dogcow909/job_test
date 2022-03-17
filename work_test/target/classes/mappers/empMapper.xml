@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="empMapper">
+	<select id="selectAll" parameterType="se" resultType="empDTO">
+		SELECT emp_no, ename_kr, ename_en, ename_ch, id_no, birth, gender,
+		married, sal_cat, job_cat, employ_cat,
+		emp_addrs, emp_mp, emp_email,
+		skill_grade, alcohol, work_year, birth_cat,
+		img_name, sys_img_name
+		FROM
+		(SELECT ROWNUM rn, emp_no, ename_kr,
+		ename_en, ename_ch, id_no, birth,
+		gender, married, sal_cat, job_cat,
+		employ_cat,
+		emp_addrs, emp_mp,
+		emp_email, skill_grade, alcohol, work_year, birth_cat,
+		img_name,
+		sys_img_name
+		FROM (SELECT emp_no, ename_kr, ename_en, ename_ch, id_no,
+		birth, gender,
+		married, sal_cat, job_cat, employ_cat,
+		emp_addrs, emp_mp,
+		emp_email, skill_grade, alcohol, work_year, birth_cat,
+		img_name,
+		sys_img_name
+		FROM emp
+		<choose>
+			<when test="searchBy=='all'">
+				WHERE ename_kr like '%'||#{keyword}||'%'
+				OR gender
+				like '%'||#{keyword}||'%'
+				OR skill_grade like '%'||#{keyword}||'%'
+			</when>
+			<when
+				test="searchBy=='ename_kr' || searchBy=='gender' || searchBy=='skill_grade'">
+				WHERE ${searchBy} like '%'||#{keyword}||'%'
+			</when>
+		</choose>
+		ORDER BY emp_no desc)
+		WHERE ROWNUM  <![CDATA[ <= ]]>
+		#{endNo})
+		WHERE rn  <![CDATA[ >= ]]>
+		#{startNo}
+	</select>
+	<select id="getTotal" resultType="int" parameterType="se">
+		SELECT count(*)
+		FROM emp
+		<choose>
+			<when test="searchBy=='all'">
+				WHERE ename_kr like '%'||#{keyword}||'%'
+				OR gender
+				like '%'||#{keyword}||'%'
+				OR skill_grade like '%'||#{keyword}||'%'
+			</when>
+			<when
+				test="searchBy=='ename_kr' || searchBy=='gender' || searchBy=='skill_grade'">
+				WHERE ${searchBy} like '%'||#{keyword}||'%'
+			</when>
+			<otherwise></otherwise>
+		</choose>
+		ORDER BY emp_no desc
+	</select>
+	<select id="isExistid" parameterType="String" resultType="int">
+		SELECT count(*)
+		FROM emp
+		WHERE id_no = #{id_no}
+	</select>
+	<select id="selectOne" parameterType="int" resultType="empDTO">
+		SELECT
+		emp_no, ename_kr, ename_en, ename_ch, id_no, birth, gender, married,
+		sal_cat, job_cat, employ_cat,
+		emp_addrs, emp_mp, emp_email,
+		skill_grade, alcohol, work_year, birth_cat,
+		img_name, sys_img_name
+		FROM
+		emp
+		WHERE emp_no = #{emp_no}
+	</select>
+	<insert id="insertEmp" parameterType="empDTO">
+		INSERT INTO emp
+		VALUES
+		(EMP_NO_SEQ.nextval, #{ename_kr}, #{ename_en}, #{ename_ch}, #{id_no},
+		to_date(#{birth}, 'YYYYMMDD'), #{gender}, #{married}, #{sal_cat},
+		#{job_cat},
+		#{employ_cat}, #{emp_addrs}, #{emp_mp}, #{emp_email},
+		#{skill_grade}, #{alcohol},
+		#{work_year}, #{birth_cat}, #{img_name},
+		#{sys_img_name})
+	</insert>
+	<update id="updateEmp" parameterType="empDTO">
+		UPDATE emp
+		SET ename_kr = #{ename_kr},
+		ename_en = #{ename_en},
+		ename_ch = #{ename_ch},
+		id_no =
+		#{id_no},
+		birth = to_date(#{birth}, 'YYYYMMDD'),
+		gender = #{gender},
+		married = #{married},
+		sal_cat = #{sal_cat},
+		job_cat = #{job_cat},
+		employ_cat = #{employ_cat},
+		emp_addrs = #{emp_addrs},
+		emp_mp =
+		#{emp_mp},
+		emp_email = #{emp_email},
+		skill_grade = #{skill_grade},
+		alcohol = #{alcohol},
+		work_year = #{work_year},
+		birth_cat =
+		#{birth_cat},
+		img_name = #{img_name},
+		sys_img_name = #{sys_img_name}
+		WHERE emp_no = #{emp_no}
+	</update>
+	<delete id="deleteEmp" parameterType="int">
+		DELETE emp
+		WHERE emp_no = #{emp_no}
+	</delete>
+</mapper>
